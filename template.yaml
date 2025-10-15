@@ -66,10 +66,28 @@
           {{ tomorrow_price[region] | map(attribute='price') | map('float') | map('multiply', 0.001) | list }}
         raw_today: >
           {%- set region = (this.attributes.get('region') | string) -%}
-          {{ today_price[region] }}
+          {%- set data = today_price[region] | map('dict') | list -%}
+          {%- set converted = data | map(attribute='start') | list -%}
+          [
+          {%- for p in today_price[region] -%}
+            {
+              "start": "{{ p.start }}",
+              "end": "{{ p.end }}",
+              "value": {{ (p.price | float / 1000) | round(3) }}
+            }{% if not loop.last %},{% endif %}
+          {%- endfor -%}
+          ]
         raw_tomorrow: >
           {%- set region = (this.attributes.get('region') | string) -%}
-          {{ tomorrow_price[region] }}
+          [
+          {%- for p in tomorrow_price[region] -%}
+            {
+              "start": "{{ p.start }}",
+              "end": "{{ p.end }}",
+              "value": {{ (p.price | float / 1000) | round(3) }}
+            }{% if not loop.last %},{% endif %}
+          {%- endfor -%}
+          ]
         current_price: "{{ (today_price[today_price.keys()| list | first] | selectattr('start', '<=', utcnow().strftime('%Y-%m-%dT%H:%M:%S+00:00')) | map(attribute='price') | list | last | float/1000) | round(4) }}"
         tomorrow_valid: >
           {%- set region = (this.attributes.get('region') | string) -%}
