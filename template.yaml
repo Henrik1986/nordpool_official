@@ -1,0 +1,84 @@
+- trigger:
+    - trigger: time_pattern
+      minutes: /15
+    - trigger: homeassistant
+      event: start
+  action:
+    - action: nordpool.get_prices_for_date
+      data:
+        config_entry: YOUR_ID
+        date: "{{ now().date() }}"
+        areas: SE3
+        currency: SEK
+      response_variable: today_price
+    - action: nordpool.get_prices_for_date
+      data:
+        config_entry: YOUR_ID
+        date: "{{ now().date() + timedelta(days=1) }}"
+        areas: SE3
+        currency: SEK
+      response_variable: tomorrow_price
+  sensor:
+    - name: "Nordpool Data Struct"
+      unique_id: nordpool_data_struct
+      state: "{{ (today_price[today_price.keys()| list | first] | selectattr('start', '<=', utcnow().strftime('%Y-%m-%dT%H:%M:%S+00:00')) | map(attribute='price') | list | last | float/1000) | round(4) }}"
+      attributes:
+        region: "YOUR_REGION"
+        additional_costs_current_hour: "0"
+        price_in_cents: "false"
+        unit: "kWh"
+        currency: "SEK"
+        country: "Sweden"
+        average: >
+          {%- set region = (this.attributes.get('region') | string) -%}
+          {{ (today_price[region] | map(attribute='price') | map('float') | sum / (today_price[region] | length) / 1000) | round(3) }}
+        off_peak_1: >
+          {%- set region = (this.attributes.get('region') | string) -%}
+          {{ (today_price[region][0:4] | map(attribute='price') | map('float') | sum / 4 / 1000) | round(3) }}
+        off_peak_2: >
+          {%- set region = (this.attributes.get('region') | string) -%}
+          {{ (today_price[region][-2:] | map(attribute='price') | map('float') | sum / 2 / 1000) | round(3) }}
+        peak: >
+          {%- set region = (this.attributes.get('region') | string) -%}
+          {{ (today_price[region][4:-2] | map(attribute='price') | map('float') | sum / ((today_price[region]|length)-6) / 1000) | round(3) }}
+        min: >
+          {%- set region = (this.attributes.get('region') | string) -%}
+          {{ (today_price[region] | map(attribute='price') | map('float') | min / 1000) | round(3) }}
+        max: >
+          {%- set region = (this.attributes.get('region') | string) -%}
+          {{ (today_price[region] | map(attribute='price') | map('float') | max / 1000) | round(3) }}
+        mean: >
+          {%- set region = (this.attributes.get('region') | string) -%}
+          {{ (today_price[region] | map(attribute='price') | map('float') | sum / (today_price[region] | length) / 1000) | round(3) }}
+        low_price: >
+          {%- set region = (this.attributes.get('region') | string) -%}
+          {% set prices = today_price[region] | map(attribute='price') | map('float') | list %}
+          {{ (prices[0] < (prices | sum / prices | length)) }}
+        price_percent_to_average: >
+          {%- set region = (this.attributes.get('region') | string) -%}
+          {% set prices = today_price[region] | map(attribute='price') | map('float') | list %}
+          {{ (prices[0] / (prices | sum / prices | length) | round(2)) }}
+        today: >
+          {%- set region = (this.attributes.get('region') | string) -%}
+          {{ today_price[region] | map(attribute='price') | map('float') | map('multiply', 0.001) | list }}
+        tomorrow: >
+          {%- set region = (this.attributes.get('region') | string) -%}
+          {{ tomorrow_price[region] | map(attribute='price') | map('float') | map('multiply', 0.001) | list }}
+        raw_today: >
+          {%- set region = (this.attributes.get('region') | string) -%}
+          {{ today_price[region] }}
+        raw_tomorrow: >
+          {%- set region = (this.attributes.get('region') | string) -%}
+          {{ tomorrow_price[region] }}
+        current_price: "{{ (today_price[today_price.keys()| list | first] | selectattr('start', '<=', utcnow().strftime('%Y-%m-%dT%H:%M:%S+00:00')) | map(attribute='price') | list | last | float/1000) | round(4) }}"
+        tomorrow_valid: >
+          {%- set region = (this.attributes.get('region') | string) -%}
+          {%- if (tomorrow_price is mapping) %}
+            {%- if tomorrow_price[region] | list | count > 0 -%}
+              {{ true | bool }}
+            {%- else %}
+              {{ false | bool }}
+            {%- endif %}
+          {%- else %}
+            {{ false | bool }}
+          {%- endif %}
