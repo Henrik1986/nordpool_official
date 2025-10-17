@@ -11,15 +11,15 @@
       data:
         config_entry: YOUR_ID
         date: "{{ now().date() }}"
-        areas: SE3
-        currency: SEK
+        areas: "YOUR_REGION"
+        currency: "YOUR_CURRENCY"
       response_variable: today_price
     - action: nordpool.get_prices_for_date
       data:
         config_entry: YOUR_ID
         date: "{{ now().date() + timedelta(days=1) }}"
-        areas: SE3
-        currency: SEK
+        areas: "YOUR_REGION"
+        currency: "YOUR_CURRENCY"
       response_variable: tomorrow_price
   sensor:
     - name: "Nordpool Data Struct"
