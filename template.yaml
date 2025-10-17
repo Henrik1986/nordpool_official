@@ -89,7 +89,9 @@
             }{% if not loop.last %},{% endif %}
           {%- endfor -%}
           ]
-        current_price: "{{ (today_price[today_price.keys()| list | first] | selectattr('start', '<=', utcnow().strftime('%Y-%m-%dT%H:%M:%S+00:00')) | map(attribute='price') | list | last | float/1000) | round(4) }}"
+        current_price: >
+          {%- set region = (this.attributes.get('region') | string) -%}
+          {{ (today_price[region] | selectattr('start', '<=', utcnow().strftime('%Y-%m-%dT%H:%M:%S+00:00')) | map(attribute='price') | list | last | float/1000) | round(4) }}
         tomorrow_valid: >
           {%- set region = (this.attributes.get('region') | string) -%}
           {%- if (tomorrow_price is mapping) %}
