@@ -66,8 +66,6 @@
           {{ tomorrow_price[region] | map(attribute='price') | map('float') | map('multiply', 0.001) | list }}
         raw_today: >
           {%- set region = (this.attributes.get('region') | string) -%}
-          {%- set data = today_price[region] | map('dict') | list -%}
-          {%- set converted = data | map(attribute='start') | list -%}
           [
           {%- for p in today_price[region] -%}
             {
