@@ -34,25 +34,25 @@
         country: "Sweden"
         average: >
           {%- set region = (this.attributes.get('region') | string) -%}
-          {{ (today_price[region] | map(attribute='price') | map('float') | sum / (today_price[region] | length) / 1000) | round(3) }}
+          {{ (today_price[region] | map(attribute='price') | map('float') | sum / (today_price[region] | length) / 1000) | round(4) }}
         off_peak_1: >
           {%- set region = (this.attributes.get('region') | string) -%}
-          {{ (today_price[region][0:4] | map(attribute='price') | map('float') | sum / 4 / 1000) | round(3) }}
+          {{ (today_price[region][0:4] | map(attribute='price') | map('float') | sum / 4 / 1000) | round(4) }}
         off_peak_2: >
           {%- set region = (this.attributes.get('region') | string) -%}
-          {{ (today_price[region][-2:] | map(attribute='price') | map('float') | sum / 2 / 1000) | round(3) }}
+          {{ (today_price[region][-2:] | map(attribute='price') | map('float') | sum / 2 / 1000) | round(4) }}
         peak: >
           {%- set region = (this.attributes.get('region') | string) -%}
-          {{ (today_price[region][4:-2] | map(attribute='price') | map('float') | sum / ((today_price[region]|length)-6) / 1000) | round(3) }}
+          {{ (today_price[region][4:-2] | map(attribute='price') | map('float') | sum / ((today_price[region]|length)-6) / 1000) | round(4) }}
         min: >
           {%- set region = (this.attributes.get('region') | string) -%}
-          {{ (today_price[region] | map(attribute='price') | map('float') | min / 1000) | round(3) }}
+          {{ (today_price[region] | map(attribute='price') | map('float') | min / 1000) | round(4) }}
         max: >
           {%- set region = (this.attributes.get('region') | string) -%}
-          {{ (today_price[region] | map(attribute='price') | map('float') | max / 1000) | round(3) }}
+          {{ (today_price[region] | map(attribute='price') | map('float') | max / 1000) | round(4) }}
         mean: >
           {%- set region = (this.attributes.get('region') | string) -%}
-          {{ (today_price[region] | map(attribute='price') | map('float') | sum / (today_price[region] | length) / 1000) | round(3) }}
+          {{ (today_price[region] | map(attribute='price') | map('float') | sum / (today_price[region] | length) / 1000) | round(4) }}
         low_price: >
           {%- set region = (this.attributes.get('region') | string) -%}
           {% set prices = today_price[region] | map(attribute='price') | map('float') | list %}
@@ -74,7 +74,7 @@
             {
               "start": "{{ p.start }}",
               "end": "{{ p.end }}",
-              "value": {{ (p.price | float / 1000) | round(3) }}
+              "value": {{ (p.price | float / 1000) | round(4) }}
             }{% if not loop.last %},{% endif %}
           {%- endfor -%}
           ]
@@ -85,7 +85,7 @@
             {
               "start": "{{ p.start }}",
               "end": "{{ p.end }}",
-              "value": {{ (p.price | float / 1000) | round(3) }}
+              "value": {{ (p.price | float / 1000) | round(4) }}
             }{% if not loop.last %},{% endif %}
           {%- endfor -%}
           ]
